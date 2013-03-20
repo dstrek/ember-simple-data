@@ -1,4 +1,3 @@
-var store = Ember.Object.extend();
 
-module.exports = store;
+module.exports.store = require('./src/store');
 
