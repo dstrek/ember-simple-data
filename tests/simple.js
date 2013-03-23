@@ -6,13 +6,27 @@ var posts = SD.store.create({
 	id_key: '_id'
 });
 
-posts.load([{
-	_id: 'asdf2f2323',
-	name: 'test post',
-	content: 'hello'
-}]);
+posts.define({
+	name: SD.attribute(),
+	content: SD.attribute(),
+	comments: SD.has_many('comment', 'comment_ids'),
+	user: SD.belongs_to('user', 'user_id')
+});
+
+posts.load([
+	{
+		_id: 0,
+		name: 'test post',
+		content: 'hello'
+	},
+	{
+		_id: 2,
+		name: 'test post 2',
+		content: 'asdfasgaregfre'
+	}
+]);
 
 console.log('all posts', posts.find());
-console.log('finding post asdf2f2323', posts.find('asdf2f2323'));
+console.log('finding post 0', posts.find(0));
 
 

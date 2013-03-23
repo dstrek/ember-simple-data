@@ -6,18 +6,35 @@ var store = Ember.Object.extend({
 	name: null,
 	id_key: 'id',
 	data: Ember.A([]),
+	attributes: {},
+
+	define: function(attrs) {
+		this.attributes = attrs;
+	},
 	
+	_load_record: function(obj) {
+		var r = record.create();
+		for (var key in obj) {
+			if ( ! this.attributes[key] && key !== this.id_key) continue;
+			r.set(key, obj[key]);
+		}
+
+		//do not load if there is no id 
+		if (r.get(this.id_key) !== undefined) {
+			this.data.pushObject(r);
+		}
+	},
+
 	load: function(objs) {
-		if ( ! Array.isArray(objs)) throw new Error('store.load should be passed an array of objects to load');
+		if ( ! Array.isArray(objs)) return this._load_record(objs);
 
 		objs.forEach(function(obj) {
-			this.get('data').pushObject(record.create(obj));
+			this._load_record(obj);
 		}, this);
-		
 	},
 	
 	find: function(id) {
-		if ( ! id) return this.data.filter(function(){return true;});
+		if (id === undefined) return this.data.filter(function(){return true;});
 
 		return this.data.findProperty(this.id_key, id);
 	}
