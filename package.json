@@ -1,0 +1,23 @@
+{
+  "name": "ember-simple-data",
+  "version": "0.0.1",
+  "description": "a simpler ember-data",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/dstrek/ember-simple-data.git"
+  },
+  "keywords": [
+    "ember",
+    "simple",
+    "data"
+  ],
+  "dependencies": {
+  },
+  "author": {
+    "name": "Nathan Miller",
+    "email": "nathan@shiftly.com",
+    "url": "http://shiftly.com"
+  },
+  "license": "MIT"
+}
