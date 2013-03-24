@@ -10,12 +10,24 @@ var store = Ember.Object.extend({
 
 	define: function(attrs) {
 		this.attributes = attrs;
+		
+		// if there is a relationship, make sure the store is defined
+		for (var key in attrs) {
+			var rel = this.attributes[key].relationship;
+			if (rel) {
+				if ( ! stores[rel.store]) {
+					throw new Error(this.name + '.' + key + ' relates to undefined store: ' + rel.store);
+				}
+			}
+		}
 	},
 	
 	_load_record: function(obj) {
 		var r = record.create();
 		for (var key in obj) {
+			// only save attributes
 			if ( ! this.attributes[key] && key !== this.id_key) continue;
+			
 			r.set(key, obj[key]);
 		}
 
