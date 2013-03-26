@@ -23,7 +23,7 @@ var store = Ember.Object.extend({
 	},
 	
 	_load_record: function(obj) {
-		var r = record.create();
+		var r = record.create({id_key: this.id_key});
 		for (var key in obj) {
 			// only save attributes
 			if ( ! this.attributes[key] && key !== this.id_key) continue;
