@@ -2,7 +2,7 @@
 var stores = require('./stores');
 var record = require('./record');
 
-var store = Ember.Object.extend({
+var store = Ember.Object.extend(Ember.Evented, {
 	name: null,
 	id_key: 'id',
 	data: Ember.A([]),
@@ -12,7 +12,7 @@ var store = Ember.Object.extend({
 		this.attributes = attrs;
 		
 		// if there is a relationship, make sure the store is defined
-		for (var key in attrs) {
+		for (var key in this.attributes) {
 			var rel = this.attributes[key].relationship;
 			if (rel) {
 				if ( ! stores[rel.store]) {
@@ -23,7 +23,7 @@ var store = Ember.Object.extend({
 	},
 	
 	_load_record: function(obj) {
-		var r = record.create({id_key: this.id_key});
+		var r = record.create({__sd_store: this});
 		for (var key in obj) {
 			// only save attributes
 			if ( ! this.attributes[key] && key !== this.id_key) continue;
@@ -34,15 +34,25 @@ var store = Ember.Object.extend({
 		//do not load if there is no id 
 		if (r.get(this.id_key) !== undefined) {
 			this.data.pushObject(r);
+			return true;
 		}
+		
+		return false;
 	},
 
 	load: function(objs) {
-		if ( ! Array.isArray(objs)) return this._load_record(objs);
+		var loaded = false;
 
-		objs.forEach(function(obj) {
-			this._load_record(obj);
-		}, this);
+		if ( ! Array.isArray(objs)) {
+			loaded = this._load_record(objs);
+		}
+		else {
+			objs.forEach(function(obj) {
+				if (this._load_record(obj)) loaded = true;
+			}, this);
+		}
+
+		if (loaded) this.trigger('loaded_records');
 	},
 	
 	find: function(id) {

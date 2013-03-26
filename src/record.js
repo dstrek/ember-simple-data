@@ -1,9 +1,9 @@
 var record = Ember.Object.extend(Ember.Evented, {
-	id_key: null,
+	__sd_store: null,
 
 	// helper
 	id: function() {
-		return this.get(this.id_key);	
+		return this.get(this.__sd_store.id_key);	
 	}
 });
 

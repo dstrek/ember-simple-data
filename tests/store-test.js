@@ -28,6 +28,10 @@ test('define the posts store', function(t) {
 	t.ok(true, 'posts defined');
 
 	t.test('insert some posts', function(t) {
+		t.plan(4);
+
+		posts.on('loaded_records', function() { t.ok(true, 'loaded_records event triggered'); });
+
 		posts.load([
 			{
 				_id: 0,
@@ -44,7 +48,6 @@ test('define the posts store', function(t) {
 		t.equal(posts.find().length, 2, 'has correct post count');
 		t.equal(posts.find(0).id(), 0, 'can find by id 0');
 		t.equal(posts.find(2).id(), 2, 'can find by id 2');
-		t.end();
 	});
 
 	t.end();
