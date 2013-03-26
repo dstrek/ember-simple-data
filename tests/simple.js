@@ -6,6 +6,16 @@ var posts = SD.store.create({
 	id_key: '_id'
 });
 
+var comments = SD.store.create({
+	name: 'comment',
+	id_key: '_id'
+});
+
+var users = SD.store.create({
+	name: 'user',
+	id_key: '_id'
+});
+
 posts.define({
 	name: SD.attribute(),
 	content: SD.attribute(),
