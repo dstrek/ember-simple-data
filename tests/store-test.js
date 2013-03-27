@@ -29,7 +29,7 @@ test('define the posts store', function(t) {
 	t.ok(true, 'posts defined');
 
 	t.test('insert some posts', function(t) {
-		t.plan(4);
+		t.plan(5);
 
 		posts.on('loaded_records', function() { t.ok(true, 'loaded_records event triggered'); });
 
@@ -49,6 +49,7 @@ test('define the posts store', function(t) {
 		t.ok(posts.find().length, 'now has posts');
 		t.equal(posts.find(0).id(), 0, 'can find by id 0');
 		t.equal(posts.find(2).id(), 2, 'can find by id 2');
+		t.notOk(posts.contains('some random id that should not be in there'), 'handles not finding');
 	});
 
 	t.end();
@@ -80,6 +81,27 @@ test('can convert to json', function(t) {
 	var c = comments.find('blah-blah');
 
 	t.equal(comments.to_json(c).text, c.get('text'), 'json looks ok so far');
+	t.end();
+});
+
+test('can update and upsert', function(t) {
+	comments.define({
+		text: SD.attribute()
+	});
+
+	comments.update({
+		_id: 'upserting',
+		text: 'superman'
+	}, true);
+
+	t.ok(comments.contains('upserting'), 'upsert ok');
+
+	comments.update({
+		_id: 'upserting',
+		text: 'batman'
+	});
+
+	t.equal(comments.find('upserting').get('text'), 'batman', 'update ok');
 	t.end();
 });
 

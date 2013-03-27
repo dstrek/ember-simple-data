@@ -23,6 +23,8 @@ var store = Ember.Object.extend(Ember.Evented, {
 	},
 	
 	_load_record: function(obj) {
+		if (obj[this.id_key] === undefined) return false;
+
 		var r = record.create({__sd_store: this});
 		for (var key in obj) {
 			// only save attributes
@@ -31,13 +33,8 @@ var store = Ember.Object.extend(Ember.Evented, {
 			r.set(key, obj[key]);
 		}
 
-		//do not load if there is no id 
-		if (r.get(this.id_key) !== undefined) {
-			this.data.pushObject(r);
-			return true;
-		}
-		
-		return false;
+		this.data.pushObject(r);
+		return true;
 	},
 
 	load: function(objs) {
@@ -53,6 +50,41 @@ var store = Ember.Object.extend(Ember.Evented, {
 		}
 
 		if (loaded) this.trigger('loaded_records');
+	},
+
+	_update_record: function(obj, upsert) {
+		var existing = this.find(obj[this.id_key]);
+
+		if (existing) {
+			// fix updating properly later
+			for (var key in this.attributes) {
+				existing.set(key, obj[key]);
+			}
+			return true;
+		}
+		else {
+			if (upsert) return this._load_record(obj);
+			else throw new Error(this.name + ' id:' + obj[this.id_key] + ' is not in the store, therefore can not update.');
+		}
+	},
+
+	update: function(objs, upsert) {
+		var updated = false;
+
+		if ( ! Array.isArray(objs)) {
+			updated = this._update_record(objs, upsert);
+		}
+		else {
+			objs.forEach(function(obj) {
+				if (this._update_record(obj, upsert)) updated = true;
+			}, this);
+		}
+
+		if (updated) this.trigger('updated_records');
+	},
+
+	contains: function(id) {
+		return !!this.data.findProperty(this.id_key, id);
 	},
 	
 	find: function(id) {
