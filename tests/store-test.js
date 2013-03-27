@@ -18,6 +18,7 @@ var users = SD.store.create({
 	id_key: '_id'
 });
 
+
 test('define the posts store', function(t) {
 	posts.define({
 		name: SD.attribute(),
@@ -45,7 +46,7 @@ test('define the posts store', function(t) {
 			}
 		]);
 
-		t.equal(posts.find().length, 2, 'has correct post count');
+		t.ok(posts.find().length, 'now has posts');
 		t.equal(posts.find(0).id(), 0, 'can find by id 0');
 		t.equal(posts.find(2).id(), 2, 'can find by id 2');
 	});
@@ -53,4 +54,32 @@ test('define the posts store', function(t) {
 	t.end();
 });
 
+test('can find and remove stores', function(t) {
+	var temp = SD.store.create({
+		name: 'temp'
+	});
+
+	t.equals(SD.store.find('temp').name, 'temp', 'found temp store');
+
+	SD.store.remove('temp');
+
+	t.notOk(SD.store.find('temp'), 'temp was removed');
+	t.end();
+});
+
+test('can convert to json', function(t) {
+	comments.define({
+		text: SD.attribute()
+	});
+
+	comments.load({
+		_id: 'blah-blah',
+		text: 'hello comment'
+	});
+
+	var c = comments.find('blah-blah');
+
+	t.equal(comments.to_json(c).text, c.get('text'), 'json looks ok so far');
+	t.end();
+});
 

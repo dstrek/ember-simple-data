@@ -59,7 +59,20 @@ var store = Ember.Object.extend(Ember.Evented, {
 		if (id === undefined) return this.data.filter(function(){return true;});
 
 		return this.data.findProperty(this.id_key, id);
+	},
+
+	to_json: function(rec, opts) {
+		if ( ! rec) throw new Error('to_json requires a record to work on');
+
+		var json = {};
+		json[this.id_key] = rec.get(this.id_key);
+		for (var key in this.attributes) {
+			if (this.attributes[key].relationship) continue;
+			json[key] = rec.get(key);
+		}
+		return json;
 	}
+
 
 });
 
@@ -71,6 +84,14 @@ store_api.create = function(opts) {
 	var s = store.create(opts);
 	stores[s.name] = s;
 	return s;
+};
+
+store_api.find = function(name) {
+	return stores[name];
+};
+
+store_api.remove = function(name) {
+	return delete stores[name];
 };
 
 module.exports = store_api;
