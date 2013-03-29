@@ -7,21 +7,36 @@ var store = Ember.Object.extend(Ember.Evented, {
 	id_key: 'id',
 	data: Ember.A([]),
 	attributes: {},
+	relationships: {},
 
 	define: function(attrs) {
-		this.attributes = attrs;
-		
-		// if there is a relationship, make sure the store is defined
-		for (var key in this.attributes) {
-			var rel = this.attributes[key].relationship;
+		for (var key in attrs) {
+			var rel = attrs[key].relationship;
 			if (rel) {
+				// if there is a relationship, make sure the store is defined
 				if ( ! stores[rel.store]) {
 					throw new Error(this.name + '.' + key + ' relates to undefined store: ' + rel.store);
 				}
+				this.relationships[key] = rel;
+			}
+			else {
+				this.attributes[key] = attrs[key].attribute;
 			}
 		}
 	},
 	
+	// set the attributes and relationships
+	// should be able to be shared by load and update
+	_set_record_properties: function(r, obj) {
+		for (var akey in this.attributes) {
+			if (this.obj[akey]) r.set(akey, obj[akey]);
+		}	
+
+		for (var rkey in this.relationships) {
+			
+		}
+	},
+
 	_load_record: function(obj) {
 		if (obj[this.id_key] === undefined) return false;
 

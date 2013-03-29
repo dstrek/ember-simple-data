@@ -105,3 +105,18 @@ test('can update and upsert', function(t) {
 	t.end();
 });
 
+test('has many relationship', function(t) {
+	users.define({
+		name: SD.attribute(),
+		comments: SD.has_many('comment', 'comment_ids')
+	});
+
+	comments.define({
+		text: SD.attribute(),
+		user: SD.belongs_to('user', 'user_id')
+	});
+
+
+	t.end();
+});
+
