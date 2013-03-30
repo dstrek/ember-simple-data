@@ -13,10 +13,10 @@ var store = Ember.Object.extend(Ember.Evented, {
 		for (var key in attrs) {
 			var rel = attrs[key].relationship;
 			if (rel) {
-				// if there is a relationship, make sure the store is defined
-				if ( ! stores[rel.store]) {
-					throw new Error(this.name + '.' + key + ' relates to undefined store: ' + rel.store);
-				}
+				if ( ! stores[rel.store]) throw new Error(this.name + '.' + key + ' relates to undefined store: ' + rel.store);
+				if ( ! rel.fkey) throw new Error(this.name + ' must define a foreign key attribute for relationship ' + key);
+				if (attrs[rel.fkey]) throw new Error(this.name + ' defined an attribute and relationship with same key: ' + key);
+				
 				this.relationships[key] = rel;
 			}
 			else {
@@ -29,25 +29,32 @@ var store = Ember.Object.extend(Ember.Evented, {
 	// should be able to be shared by load and update
 	_set_record_properties: function(r, obj) {
 		for (var akey in this.attributes) {
-			if (this.obj[akey]) r.set(akey, obj[akey]);
+			if (obj[akey]) r.set(akey, obj[akey]);
 		}	
 
 		for (var rkey in this.relationships) {
-			
+			var rel = this.relationships[rkey];
+			if ( ! obj[rkey]) continue;
+
+			// for has many the related attribute needs to be an observable array
+			if (rel.type === 'has_many') {
+				if ( ! r.hasProperty(rkey)) r.set(rel.fkey, Ember.A([])); 
+				// compare the array and clear or add difference?
+				r.get(rel.fkey);	
+			}
+			else {
+				r.set(rel.fkey, obj[rkey]);
+			}
 		}
 	},
 
 	_load_record: function(obj) {
 		if (obj[this.id_key] === undefined) return false;
 
+		// we should do a find or create otherwise multiple loads will dupe
 		var r = record.create({__sd_store: this});
-		for (var key in obj) {
-			// only save attributes
-			if ( ! this.attributes[key] && key !== this.id_key) continue;
-			
-			r.set(key, obj[key]);
-		}
-
+		r.set(this.id_key, obj[this.id_key]);
+		this._set_record_properties(r, obj);
 		this.data.pushObject(r);
 		return true;
 	},

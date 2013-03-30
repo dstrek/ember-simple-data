@@ -47,8 +47,8 @@ test('define the posts store', function(t) {
 		]);
 
 		t.ok(posts.find().length, 'now has posts');
-		t.equal(posts.find(0).id(), 0, 'can find by id 0');
-		t.equal(posts.find(2).id(), 2, 'can find by id 2');
+		t.equal(posts.find(0).get('_id'), 0, 'can find by id 0');
+		t.equal(posts.find(2).get('_id'), 2, 'can find by id 2');
 		t.notOk(posts.contains('some random id that should not be in there'), 'handles not finding');
 	});
 
