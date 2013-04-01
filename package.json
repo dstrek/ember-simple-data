@@ -16,7 +16,7 @@
     "tap": "~0.4.1"
   },
 	"scripts": {
-		"test": "tap tests/store-test.js"
+		"test": "tap tests/*.js"
 	},
   "author": {
     "name": "Nathan Miller",

@@ -27,23 +27,50 @@ var store = Ember.Object.extend(Ember.Evented, {
 	
 	// set the attributes and relationships
 	// should be able to be shared by load and update
-	_set_record_properties: function(r, obj) {
+	_set_record_properties: function(r, obj, load_embedded) {
 		for (var akey in this.attributes) {
 			if (obj[akey]) r.set(akey, obj[akey]);
 		}	
 
 		for (var rkey in this.relationships) {
 			var rel = this.relationships[rkey];
-			if ( ! obj[rkey]) continue;
+
+			// make sure an array is set first
+			if ( ! r.hasOwnProperty(rel.fkey)) r.set(rel.fkey, Ember.A([])); 
 
 			// for has many the related attribute needs to be an observable array
 			if (rel.type === 'has_many') {
-				if ( ! r.hasProperty(rkey)) r.set(rel.fkey, Ember.A([])); 
-				// compare the array and clear or add difference?
-				r.get(rel.fkey);	
+
+				// foreign key id list of related objects
+				if (Array.isArray(obj[rel.fkey])) {
+					// ids might contain space and upside down underscores but... meh
+					if (r.get(rel.fkey).slice().sort().join(' ¡ ') !== obj[rel.fkey].slice().sort().join(' ¡ ')) {
+						r.get(rel.fkey).clear().pushObjects(obj[rel.fkey]);
+					}
+				}
+
+				// embedded list of objects to load and populate the rel.fkey array with
+				// TODO some validation on embedded objects actually being loaded...
+				if (load_embedded && Array.isArray(obj[rkey])) {
+					var loaded_ids = [];
+					var s = stores[rel.store];
+
+					// TODO insert the fkey on embedded objects before load
+					s.update(obj[rkey], true);
+					for (var okey in obj[rkey]) loaded_ids.push(obj[rkey][okey][s.id_key]);
+
+					// ids might contain space and upside down underscores but... meh
+					if (r.get(rel.fkey).slice().sort().join(' ¡ ') !== loaded_ids.slice().sort().join(' ¡ ')) {
+						r.get(rel.fkey).clear().pushObjects(loaded_ids);
+					}
+				}
+			}
+			else if (rel.type === 'belongs_to'){
+				r.set(rel.fkey, obj[rkey]);
+				// TODO detect if load_embedded
 			}
 			else {
-				r.set(rel.fkey, obj[rkey]);
+				throw new Error('unknown relationship type: ' + rel.type);
 			}
 		}
 	},
@@ -130,6 +157,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 });
 
+// the exposed api
 var store_api = function() {
 	
 };
@@ -149,4 +177,5 @@ store_api.remove = function(name) {
 };
 
 module.exports = store_api;
+
 
