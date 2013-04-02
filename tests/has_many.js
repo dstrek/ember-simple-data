@@ -15,7 +15,7 @@ test('has many relationship', function(t) {
 
 	users.define({
 		name: SD.attribute(),
-		comments: SD.has_many('comment', 'comment_ids')
+		comments: SD.has_many('comment', 'comment_ids', {embedded: true})
 	});
 
 	comments.define({
@@ -34,16 +34,12 @@ test('has many relationship', function(t) {
 			name: 'samantha',
 			comments: [
 				{
-					_id: 22,
-					text: 'adsf asdfwegerg'
-				},
-				{
-					_id: 22,
+					_id: 202,
 					text: 'adsf asdfwegerg'
 				}
 			]
 		}
-	]);
+	], true);
 
 	comments.load([
 		{
@@ -62,6 +58,8 @@ test('has many relationship', function(t) {
 			user_id: 'bob'
 		}
 	]);
+
+	console.log('bob comments', users.find('bob').get('comments'));
 
 	t.end();
 });

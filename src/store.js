@@ -1,4 +1,4 @@
-// the global store ref
+/*jshint loopfunc: true*/
 var stores = require('./stores');
 var record = require('./record');
 
@@ -51,14 +51,21 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 				// embedded list of objects to load and populate the rel.fkey array with
 				// TODO some validation on embedded objects actually being loaded...
-				if (load_embedded && Array.isArray(obj[rkey])) {
+				if (rel.opts.embedded && Array.isArray(obj[rkey])) {
 					var loaded_ids = [];
 					var s = stores[rel.store];
 
 					// TODO insert the fkey on embedded objects before load
 					s.update(obj[rkey], true);
-					for (var okey in obj[rkey]) loaded_ids.push(obj[rkey][okey][s.id_key]);
+					obj[rkey].forEach(function(o) {
+						console.log('loaded embedded', o);
+						loaded_ids.push(o[s.id_key]);
+					});
 
+					//for (var okey in obj[rkey]) {
+					//	console.log('loaded embedded', okey, obj[rkey]);
+					//	loaded_ids.push(obj[rkey][okey][s.id_key]);
+					//}
 					// ids might contain space and upside down underscores but... meh
 					if (r.get(rel.fkey).slice().sort().join(' ¡ ') !== loaded_ids.slice().sort().join(' ¡ ')) {
 						r.get(rel.fkey).clear().pushObjects(loaded_ids);
@@ -99,6 +106,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 		}
 
 		if (loaded) this.trigger('loaded_records');
+		if (loaded) console.log(this.name + ' loaded ' + objs);
 	},
 
 	_update_record: function(obj, upsert) {
