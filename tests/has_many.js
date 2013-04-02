@@ -20,14 +20,14 @@ test('has many relationship', function(t) {
 
 	comments.define({
 		text: SD.attribute(),
-		user: SD.belongs_to('user', 'user_id')
+		user: SD.belongs_to('user', 'user_id', {embedded: true})
 	});
 
 	users.load([
 		{
 			_id: 'bob',
 			name: 'bob',
-			comment_ids: [22, 123, 4]
+			comment_ids: [22, 123]
 		},
 		{
 			_id: 'samantha',
@@ -35,6 +35,10 @@ test('has many relationship', function(t) {
 			comments: [
 				{
 					_id: 202,
+					text: 'adsf asdfwegerg'
+				},	
+				{
+					_id: 44,
 					text: 'adsf asdfwegerg'
 				}
 			]
@@ -55,11 +59,16 @@ test('has many relationship', function(t) {
 		{
 			_id: 4,
 			text: 'adsf asdfwegeasdfsdafsrg24tf  fasdf adsf asd fg',
-			user_id: 'bob'
+			user: {
+				_id: 'samantha',
+				name: 'sammy'
+			}
 		}
 	]);
 
-	console.log('bob comments', users.find('bob').get('comments'));
+	console.log('bob -> comments =', users.find('bob').get('comments'));
+	console.log('comment 4 -> user =', comments.find(4).get('user.name'));
+	console.log('comment 4 -> user -> comments =', comments.find(4).get('user').get('comments'));
 
 	t.end();
 });

@@ -34,12 +34,10 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 		for (var rkey in this.relationships) {
 			var rel = this.relationships[rkey];
+			var rel_store = stores[rel.store];
 
-			// make sure an array is set first
-			if ( ! r.hasOwnProperty(rel.fkey)) r.set(rel.fkey, Ember.A([])); 
-
-			// for has many the related attribute needs to be an observable array
 			if (rel.type === 'has_many') {
+				if ( ! r.hasOwnProperty(rel.fkey)) r.set(rel.fkey, Ember.A([])); 
 
 				// foreign key id list of related objects
 				if (Array.isArray(obj[rel.fkey])) {
@@ -53,19 +51,14 @@ var store = Ember.Object.extend(Ember.Evented, {
 				// TODO some validation on embedded objects actually being loaded...
 				if (rel.opts.embedded && Array.isArray(obj[rkey])) {
 					var loaded_ids = [];
-					var s = stores[rel.store];
 
-					// TODO insert the fkey on embedded objects before load
-					s.update(obj[rkey], true);
+					// TODO auto set the fkey on embedded objects
+					rel_store.update(obj[rkey], true);
 					obj[rkey].forEach(function(o) {
-						console.log('loaded embedded', o);
-						loaded_ids.push(o[s.id_key]);
+						console.log('loaded embedded has_many', o);
+						loaded_ids.push(o[rel_store.id_key]);
 					});
 
-					//for (var okey in obj[rkey]) {
-					//	console.log('loaded embedded', okey, obj[rkey]);
-					//	loaded_ids.push(obj[rkey][okey][s.id_key]);
-					//}
 					// ids might contain space and upside down underscores but... meh
 					if (r.get(rel.fkey).slice().sort().join(' ¡ ') !== loaded_ids.slice().sort().join(' ¡ ')) {
 						r.get(rel.fkey).clear().pushObjects(loaded_ids);
@@ -73,20 +66,52 @@ var store = Ember.Object.extend(Ember.Evented, {
 				}
 			}
 			else if (rel.type === 'belongs_to'){
-				r.set(rel.fkey, obj[rkey]);
-				// TODO detect if load_embedded
+				if (obj[rel.fkey] !== undefined) r.set(rel.fkey, obj[rel.fkey]);
+
+				if (rel.opts.embedded && typeof obj[rkey] === 'object') {
+					rel_store.update(obj[rkey], true);
+					r.set(rel.fkey, obj[rkey][rel_store.id_key]);
+					console.log('loaded embedded belongs_to', obj[rkey]);
+				}
 			}
 			else {
 				throw new Error('unknown relationship type: ' + rel.type);
 			}
+
+			if ( ! r.hasOwnProperty(rkey)) this._set_computed_property(r, rkey, rel);
 		}
+	},
+
+	_set_computed_property: function(r, key, rel) {
+		// we make a bunch of assumptions on keys existing and having the right data
+		// might need some checking later
+		var computed = Ember.computed(function(key, value) {
+			var that = this;
+
+			if (rel.type === 'has_many') {
+				var fprop = function(item, index, enumerable) {
+					console.log(that.get(rel.fkey), 'contains?', item.get('_id'), stores[rel.store].id_key);
+					if (that.get(rel.fkey).contains(item.get(stores[rel.store].id_key))) {
+						console.log('yes');
+						return true;
+					}
+					return false;
+				};
+				return stores[rel.store].filter(fprop);
+			}
+			else if (rel.type === 'belongs_to') {
+				return stores[rel.store].find(this.get(rel.fkey));
+			}
+		}).property(rel.fkey).readOnly();
+		
+		Ember.defineProperty(r, key, computed);
 	},
 
 	_load_record: function(obj) {
 		if (obj[this.id_key] === undefined) return false;
 
 		// we should do a find or create otherwise multiple loads will dupe
-		var r = record.create({__sd_store: this});
+		var r = record.create();
 		r.set(this.id_key, obj[this.id_key]);
 		this._set_record_properties(r, obj);
 		this.data.pushObject(r);
@@ -107,6 +132,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 		if (loaded) this.trigger('loaded_records');
 		if (loaded) console.log(this.name + ' loaded ' + objs);
+		return loaded;
 	},
 
 	_update_record: function(obj, upsert) {
@@ -138,6 +164,8 @@ var store = Ember.Object.extend(Ember.Evented, {
 		}
 
 		if (updated) this.trigger('updated_records');
+		if (updated) console.log(this.name + ' upserted ' + objs);
+		return updated;
 	},
 
 	contains: function(id) {
@@ -148,6 +176,11 @@ var store = Ember.Object.extend(Ember.Evented, {
 		if (id === undefined) return this.data.filter(function(){return true;});
 
 		return this.data.findProperty(this.id_key, id);
+	},
+
+	// just pass through to data array
+	filter: function(fn, context) {
+		return this.data.filter(fn, context);
 	},
 
 	to_json: function(rec, opts) {
