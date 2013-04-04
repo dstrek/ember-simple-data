@@ -3,11 +3,14 @@ var stores = require('./stores');
 var record = require('./record');
 
 var store = Ember.Object.extend(Ember.Evented, {
-	name: null,
-	id_key: 'id',
-	data: Ember.A([]),
-	attributes: {},
-	relationships: {},
+
+	init: function() {
+		if ( ! this.name) throw new Error('you must at lest give stores a name');
+		this.id_key = this.id_key || 'id';
+		this.attributes = {};
+		this.relationships = {};
+		this.data = Ember.A([]);
+	},
 
 	define: function(attrs) {
 		for (var key in attrs) {
@@ -61,6 +64,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 					// ids might contain space and upside down underscores but... meh
 					if (r.get(rel.fkey).slice().sort().join(' ¡ ') !== loaded_ids.slice().sort().join(' ¡ ')) {
+						console.log('updating', r.get('_id'), rel.fkey, 'with', loaded_ids);
 						r.get(rel.fkey).clear().pushObjects(loaded_ids);
 					}
 				}
@@ -69,6 +73,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 				if (obj[rel.fkey] !== undefined) r.set(rel.fkey, obj[rel.fkey]);
 
 				if (rel.opts.embedded && typeof obj[rkey] === 'object') {
+					console.log('*** store', rel_store.name, 'updating with', obj[rkey]);
 					rel_store.update(obj[rkey], true);
 					r.set(rel.fkey, obj[rkey][rel_store.id_key]);
 					console.log('loaded embedded belongs_to', obj[rkey]);
@@ -90,12 +95,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 			if (rel.type === 'has_many') {
 				var fprop = function(item, index, enumerable) {
-					console.log(that.get(rel.fkey), 'contains?', item.get('_id'), stores[rel.store].id_key);
-					if (that.get(rel.fkey).contains(item.get(stores[rel.store].id_key))) {
-						console.log('yes');
-						return true;
-					}
-					return false;
+					return that.get(rel.fkey).toArray().contains(item.get(stores[rel.store].id_key));
 				};
 				return stores[rel.store].filter(fprop);
 			}

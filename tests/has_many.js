@@ -59,16 +59,20 @@ test('has many relationship', function(t) {
 		{
 			_id: 4,
 			text: 'adsf asdfwegeasdfsdafsrg24tf  fasdf adsf asd fg',
-			user: {
-				_id: 'samantha',
-				name: 'sammy'
-			}
+			user_id: 'samantha'
 		}
 	]);
 
 	console.log('bob -> comments =', users.find('bob').get('comments'));
 	console.log('comment 4 -> user =', comments.find(4).get('user.name'));
 	console.log('comment 4 -> user -> comments =', comments.find(4).get('user').get('comments'));
+
+	t.equal(users.find('bob').get('comments').length, 2, 'bob has 2 comments');
+	t.equal(comments.find(22).get('user.name'), 'bob', 'comment 22 belongs_to bob');
+	t.equal(users.find('samantha').get('comments').length, 2, 'samantha has 2 comments');
+	t.equal(comments.find(44).get('user.name'), 'samanta', 'comment 44 belongs_to samantha');
+	t.equal(users.find('bob').get('comments').objectAt(0).get('user.name'), 'bob', 'circular user -> comments[0] -> user for bob');
+	t.equal(users.find('samantha').get('comments').objectAt(0).get('user.name'), 'samantha', 'circular user -> comments[0] -> user for samantha');
 
 	t.end();
 });
