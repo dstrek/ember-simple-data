@@ -119,6 +119,22 @@ comments.find(22).get('user'); // The user object that this post belongs to
 comments.find(22).get('user').get('name'); // 'Riker'
 ```
 
+### Loading embedded objects
+
+The difference here is that instead of an array of `comment_ids` it's an array of objects on the `comments` attribute. This will load the comments into the comment store and then add the ids to the `comment_ids` array on the user object. You must at this point in time also provide the relationships inside the comment object as though you were loading the comments in a non-embedded fashion.
+
+```js
+users.load({
+	_id: 'troi',
+	name: 'Troi',
+	comments: [{
+		_id: 1701,
+		text: 'This is a stupid comment.',
+		user_id: 'troi'
+	}]
+});
+```
+
 ## more to come
 
 
