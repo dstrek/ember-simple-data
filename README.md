@@ -108,7 +108,7 @@ comments.contains(123451235); // false
 comments.contains(1701); // true
 ```
 
-### Accessing your object attributes
+### Accessing object attributes
 
 The objects are loaded into the store as instances of Ember.Object so you will need to use `.get()` so that all the observer functions fire properly, especially with the relationship attributes.
 
@@ -117,6 +117,8 @@ comments.find(22).get('_id'); // 22
 comments.find(22).get('text'); // 'Greetings from planet Earth.'
 comments.find(22).get('user'); // The user object that this post belongs to
 comments.find(22).get('user').get('name'); // 'Riker'
+// and Ember has shortcuts to fetch attributes using dot notation
+comments.find(22).get('user.name'); // 'Riker'
 ```
 
 ### Loading embedded objects

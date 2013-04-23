@@ -15,12 +15,12 @@ test('has many relationship', function(t) {
 
 	users.define({
 		name: SD.attribute(),
-		comments: SD.has_many('comment', 'comment_ids', {embedded: true})
+		comments: SD.has_many('comment', 'comment_ids')
 	});
 
 	comments.define({
 		text: SD.attribute(),
-		user: SD.belongs_to('user', 'user_id', {embedded: true})
+		user: SD.belongs_to('user', 'user_id')
 	});
 
 	users.load([

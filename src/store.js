@@ -52,10 +52,9 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 				// embedded list of objects to load and populate the rel.fkey array with
 				// TODO some validation on embedded objects actually being loaded...
-				if (rel.opts.embedded && Array.isArray(obj[rkey])) {
+				if (Array.isArray(obj[rkey])) {
 					var loaded_ids = [];
 
-					// TODO auto set the fkey on embedded objects
 					rel_store.update(obj[rkey], true);
 					obj[rkey].forEach(function(o) {
 						console.log('loaded embedded has_many', o);
@@ -72,7 +71,8 @@ var store = Ember.Object.extend(Ember.Evented, {
 			else if (rel.type === 'belongs_to'){
 				if (obj[rel.fkey] !== undefined) r.set(rel.fkey, obj[rel.fkey]);
 
-				if (rel.opts.embedded && typeof obj[rkey] === 'object') {
+				// embedded object to load
+				if (typeof obj[rkey] === 'object') {
 					console.log('*** store', rel_store.name, 'updating with', obj[rkey]);
 					rel_store.update(obj[rkey], true);
 					r.set(rel.fkey, obj[rkey][rel_store.id_key]);
