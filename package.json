@@ -1,7 +1,7 @@
 {
   "name": "ember-simple-data",
   "version": "0.0.1",
-  "description": "a simpler ember-data",
+  "description": "a simple data store for emberjs",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -9,8 +9,10 @@
   },
   "keywords": [
     "ember",
+		"emberjs",
     "simple",
-    "data"
+    "data",
+		"store"
   ],
   "dependencies": {
     "tap": "~0.4.1"

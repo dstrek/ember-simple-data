@@ -8,7 +8,7 @@ $ npm install ember-simple-data
 var SD = require('ember-simple-data');
 ```
 
-First we need to create some store objects that houses our models. Each store needs a unique name which we will use to reference it. IDs default to 'id' but you can specify which key on your objects you would like to use as an id, it obviously must be unique in your data set.
+First we need to create some store objects that will house our models. Each store needs a unique name which we will use to reference it. The id keys on your models default to 'id' but you can specify which key to use instead, obviously it must be unique in your data set.
 
 ```js
 var users = SD.store.create({
@@ -22,7 +22,7 @@ var comments = SD.store.create({
 });
 ```
 
-Then we need to define the models that will be inserted into the store. This is a description of the attributes on each object and its relationship to other objects you have. The `has_many` and `belongs_to` attribute definitions require you pass it the name of the store these related objects are defined on and which attribute to expect the list of ids to be in.
+Then we need to define the models that will be inserted into the store. This is a description of the attributes on each object and its relationship to other objects you have. The `has_many` and `belongs_to` attribute definitions require you pass the name of the store which these related objects are defined on and which attribute contains the list of ids or id.
 
 ```js
 users.define({
