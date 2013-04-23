@@ -35,11 +35,13 @@ test('has many relationship', function(t) {
 			comments: [
 				{
 					_id: 202,
-					text: 'adsf asdfwegerg'
+					text: 'adsf asdfwegerg',
+					user_id: 'samantha'
 				},	
 				{
 					_id: 44,
-					text: 'adsf asdfwegerg'
+					text: 'adsf asdfwegerg',
+					user_id: 'samantha'
 				}
 			]
 		}
@@ -70,7 +72,7 @@ test('has many relationship', function(t) {
 	t.equal(users.find('bob').get('comments').length, 2, 'bob has 2 comments');
 	t.equal(comments.find(22).get('user.name'), 'bob', 'comment 22 belongs_to bob');
 	t.equal(users.find('samantha').get('comments').length, 2, 'samantha has 2 comments');
-	t.equal(comments.find(44).get('user.name'), 'samanta', 'comment 44 belongs_to samantha');
+	t.equal(comments.find(44).get('user.name'), 'samantha', 'comment 44 belongs_to samantha');
 	t.equal(users.find('bob').get('comments').objectAt(0).get('user.name'), 'bob', 'circular user -> comments[0] -> user for bob');
 	t.equal(users.find('samantha').get('comments').objectAt(0).get('user.name'), 'samantha', 'circular user -> comments[0] -> user for samantha');
 
