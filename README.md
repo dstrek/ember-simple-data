@@ -94,8 +94,6 @@ comments.update({
 
 ### Finding objects
 
-Pretty simple, `find()` will return all in the store, pass it an id to get a specific object.
-
 ```js
 comments.all(); // returns array of all objects, array auto updated when new objects are loaded
 comments.id(1701); // return object proxy of a find by id, will return empty object until id is loaded
