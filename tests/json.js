@@ -17,7 +17,7 @@ test('can convert to json', function(t) {
 		text: 'hello comment'
 	});
 
-	var c = comments.find('blah-blah');
+	var c = comments.id('blah-blah');
 
 	t.equal(comments.to_json(c).text, c.get('text'), 'json looks ok so far');
 	t.end();

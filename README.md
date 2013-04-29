@@ -97,9 +97,12 @@ comments.update({
 Pretty simple, `find()` will return all in the store, pass it an id to get a specific object.
 
 ```js
-comments.find();
-comments.all(); // convenience method for the above
-comments.find(1701);
+comments.all(); // returns array of all objects, array auto updated when new objects are loaded
+comments.id(1701); // return object proxy of a find by id, will return empty object until id is loaded
+
+// if you don't want an observed array/object returned you can use the internal _find function
+comments._find();
+comments._find(1701);
 ```
 
 If you just want to know if an id exists in your store you can use `contains()`
@@ -114,12 +117,12 @@ comments.contains(1701); // true
 The objects are loaded into the store as instances of Ember.Object so you will need to use `.get()` so that all the observer functions fire properly, especially with the relationship attributes.
 
 ```js
-comments.find(22).get('_id'); // 22
-comments.find(22).get('text'); // 'Greetings from planet Earth.'
-comments.find(22).get('user'); // The user object that this post belongs to
-comments.find(22).get('user').get('name'); // 'Riker'
+comments.id(22).get('_id'); // 22
+comments.id(22).get('text'); // 'Greetings from planet Earth.'
+comments.id(22).get('user'); // The user object that this post belongs to
+comments.id(22).get('user').get('name'); // 'Riker'
 // and Ember has shortcuts to fetch attributes using dot notation
-comments.find(22).get('user.name'); // 'Riker'
+comments.id(22).get('user.name'); // 'Riker'
 ```
 
 ### Loading embedded objects

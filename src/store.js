@@ -1,6 +1,7 @@
 /*jshint loopfunc: true*/
 var stores = require('./stores');
 var record = require('./record');
+var result = require('./result');
 
 var store = Ember.Object.extend(Ember.Evented, {
 
@@ -100,7 +101,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 				return stores[rel.store].filter(fprop);
 			}
 			else if (rel.type === 'belongs_to') {
-				return stores[rel.store].find(this.get(rel.fkey));
+				return stores[rel.store]._find(this.get(rel.fkey));
 			}
 		}).property(rel.fkey).readOnly();
 		
@@ -136,7 +137,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 	},
 
 	_update_record: function(obj, upsert) {
-		var existing = this.find(obj[this.id_key]);
+		var existing = this._find(obj[this.id_key]);
 
 		if (existing) {
 			// fix updating properly later
@@ -172,19 +173,22 @@ var store = Ember.Object.extend(Ember.Evented, {
 		return !!this.data.findProperty(this.id_key, id);
 	},
 	
-	find: function(id) {
-		if (id === undefined) return this.data.filter(function(){return true;});
+	_find: function(id) {
+		if (id === undefined) return this.data.filter(function(){ return true; });
 
 		return this.data.findProperty(this.id_key, id);
 	},
 
-	all: function() {
-		return this.find();
+	id: function(id) {
+		return result.object(this, this.id_key, id);
 	},
 
-	// just pass through to data array
+	all: function() {
+		return result.array(this, function(){ return true; });
+	},
+
 	filter: function(fn, context) {
-		return this.data.filter(fn, context);
+		return result.array(this, fn, context);
 	},
 
 	to_json: function(rec, opts) {

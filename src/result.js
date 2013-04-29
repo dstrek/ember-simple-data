@@ -1,48 +1,40 @@
-// NAH THIS IS STUPID SHIT
-// a simple result might be:
-// - an object proxy
-// - keep the filter argument
-// - mixin to attach observers to the store it came from
-// - observe relationship stores too
-// - update its internal object by calling the store again on a change
+var record = require('./record');
 
-var result_mixin = Ember.Mixin.extend({
-	__sd_store: null,
-	__sd_sync_func: function(){},
+// just return a mutable array as teh result of the filter
+// watch the store for events and update the returned array
+// figure out what to do about tearing down the bindings later
+var result_array = function(store, filter_func) {
+	var res = Ember.A(store.data.filter(filter_func));
 
-	init: function() {
-		this._super.apply(this, arguments);
-		this.content = this.__sd_sync_func();
+	var result_sync = function() {
+		console.log('result_sync');
+		res.setObjects(store.data.filter(filter_func));
+	};
 
-		// setup obs, fix properly later
-		__sd_store.on('loaded_records', this.__sd_sync_it());
-		__sd_store.on('updated_records', this.__sd_sync_it());
-	},
+	store.on('loaded_records', result_sync);
+	store.on('updated_records', result_sync);
 
-	__sd_sync_it: function() {
-		var that = this;
-		return function() {
-			console.log('syncing this shit');
-			that.content = that.__sd_sync_func();
-		};
-	}
-});
-
-var result_object = Ember.ObjectProxy.extend(result_mixin, {
-
-});
-
-var result_array = Ember.ArrayProxy.extend(result_mixin, {
-
-});
-
-var make_result = function(res_type, store, sync_func) {
-	if (typeof sync_func !== 'function') throw new Error('sync_func is not a function');
-
-	if (res_type === 'array') return new result_array({__sd_store: store, __sd_sync: sync_func});
-	else return new result_object({__sd_store: store, __sd_sync: sync_func});
-	
+	return res;
 };
 
-module.exports = make_result;
+// use ObjectProxy to update the result of a findProperty when content changes in the store
+// again figure out releasing bindings later when it becomes an issue ;p
+// and we can probably make this more efficient if needed
+var result_object = function(store, prop, val) {
+	var content = store.data.findProperty(prop, val) || record.create();
+	var res = Ember.ObjectProxy.create({content: content });
+
+	var result_sync = function() {
+		console.log('result_sync for object');
+		res.set('content', store.data.findProperty(prop, val) || record.create());
+	};
+
+	store.on('loaded_records', result_sync);
+	store.on('updated_records', result_sync);
+
+	return res;
+};
+
+module.exports.array = result_array;
+module.exports.object = result_object;
 
