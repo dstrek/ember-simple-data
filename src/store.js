@@ -101,7 +101,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 				return stores[rel.store].data.filter(fprop);
 			}
 			else if (rel.type === 'belongs_to') {
-				return stores[rel.store]._find(this.get(rel.fkey));
+				return stores[rel.store].find(this.get(rel.fkey));
 			}
 		}).property(rel.fkey).readOnly();
 		
@@ -139,7 +139,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 	},
 
 	_update_record: function(obj, upsert) {
-		var existing = this._find(obj[this.id_key]);
+		var existing = this.find(obj[this.id_key]);
 
 		if (existing) {
 			// fix updating properly later
@@ -175,22 +175,14 @@ var store = Ember.Object.extend(Ember.Evented, {
 		return !!this.data.findProperty(this.id_key, id);
 	},
 	
-	_find: function(id) {
+	find: function(id) {
 		if (id === undefined) return this.data.filter(function(){ return true; });
 
 		return this.data.findProperty(this.id_key, id);
 	},
 
-	id: function(id) {
-		return result.object(this, this.id_key, id);
-	},
-
-	all: function() {
-		return result.array(this, function(){ return true; });
-	},
-
 	filter: function(fn, context) {
-		return result.array(this, fn, context);
+		return this.data.filter(fn, context);
 	},
 
 	to_json: function(rec, opts) {

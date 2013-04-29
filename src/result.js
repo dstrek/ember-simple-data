@@ -26,7 +26,8 @@ var result_object = function(store, prop, val) {
 
 	var result_sync = function() {
 		console.log('result_sync for object');
-		res.set('content', store.data.findProperty(prop, val) || record.create());
+		var found = store.data.findProperty(prop, val);
+		if (found) res.set('content', found);
 	};
 
 	store.on('loaded_records', result_sync);

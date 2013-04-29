@@ -24,7 +24,7 @@ test('can update and upsert', function(t) {
 		text: 'batman'
 	});
 
-	t.equal(comments.id('upserting').get('text'), 'batman', 'update ok');
+	t.equal(comments.find('upserting').get('text'), 'batman', 'update ok');
 	t.end();
 });
 

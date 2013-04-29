@@ -45,11 +45,11 @@ test('define the posts store', function(t) {
 			}
 		]);
 
-		t.equal(posts.all().length, 2, 'now has 2 posts');
-		t.equal(comments.all().length, 1, 'now has 1 comment');
-		t.equal(posts.id(0).get('_id'), 0, 'can find by id 0');
-		t.equal(posts.id(2).get('_id'), 2, 'can find by id 2');
-		t.equal(comments.id('comment 22').get('_id'), 'comment 22', 'can find by id "comment 22"');
+		t.equal(posts.find().length, 2, 'now has 2 posts');
+		t.equal(comments.find().length, 1, 'now has 1 comment');
+		t.equal(posts.find(0).get('_id'), 0, 'can find by id 0');
+		t.equal(posts.find(2).get('_id'), 2, 'can find by id 2');
+		t.equal(comments.find('comment 22').get('_id'), 'comment 22', 'can find by id "comment 22"');
 		t.notOk(posts.contains('some random id that should not be in there'), 'handles not finding');
 	});
 
