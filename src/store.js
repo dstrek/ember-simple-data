@@ -98,7 +98,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 				var fprop = function(item, index, enumerable) {
 					return that.get(rel.fkey).toArray().contains(item.get(stores[rel.store].id_key));
 				};
-				return stores[rel.store].filter(fprop);
+				return stores[rel.store].data.filter(fprop);
 			}
 			else if (rel.type === 'belongs_to') {
 				return stores[rel.store]._find(this.get(rel.fkey));
