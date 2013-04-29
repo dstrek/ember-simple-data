@@ -178,6 +178,10 @@ var store = Ember.Object.extend(Ember.Evented, {
 		return this.data.findProperty(this.id_key, id);
 	},
 
+	all: function() {
+		return this.find();
+	},
+
 	// just pass through to data array
 	filter: function(fn, context) {
 		return this.data.filter(fn, context);
