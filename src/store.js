@@ -110,6 +110,8 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 	_load_record: function(obj) {
 		if (obj[this.id_key] === undefined) return false;
+		// for now just ignore duplicate ids
+		if (this.contains(obj[this.id_key])) return false;
 
 		// we should do a find or create otherwise multiple loads will dupe
 		var r = record.create();
