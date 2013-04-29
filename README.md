@@ -98,6 +98,7 @@ Pretty simple, `find()` will return all in the store, pass it an id to get a spe
 
 ```js
 comments.find();
+comments.all(); // convenience method for the above
 comments.find(1701);
 ```
 
