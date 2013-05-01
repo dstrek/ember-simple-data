@@ -1,7 +1,6 @@
 /*jshint loopfunc: true*/
 var stores = require('./stores');
 var record = require('./record');
-var result = require('./result');
 
 var store = Ember.Object.extend(Ember.Evented, {
 
@@ -212,6 +211,7 @@ store_api.create = function(opts) {
 };
 
 store_api.find = function(name) {
+	if ( ! stores[name]) throw Error('no store with that name');
 	return stores[name];
 };
 
