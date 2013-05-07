@@ -1,5 +1,5 @@
 // just a shortcut for some prepared json config
-module.exports = function(store_name, fkey_field, opts) {
+module.exports = function(fkey_field, store_name, opts) {
 	opts = opts || {};
 	var config = {
 		attribute: false,

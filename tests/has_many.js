@@ -14,24 +14,25 @@ test('has many relationship', function(t) {
 	});
 
 	users.define({
-		name: SD.attribute(),
-		comments: SD.has_many('comment', 'comment_ids')
+		name: SD.attribute('name_src'),
+		comments: SD.has_many('comment_ids', 'comment')
 	});
 
 	comments.define({
 		text: SD.attribute(),
-		user: SD.belongs_to('user', 'user_id')
+		user: SD.belongs_to('user_id', 'user')
 	});
 
 	users.load([
 		{
 			_id: 'bob',
-			name: 'bob',
-			comment_ids: [22, 123]
+			name_src: 'bob',
+			comment_ids: [22, 123],
+			set: 2
 		},
 		{
 			_id: 'samantha',
-			name: 'samantha',
+			name_src: 'samantha',
 			comments: [
 				{
 					_id: 202,

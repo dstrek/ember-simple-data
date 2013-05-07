@@ -14,6 +14,10 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 	define: function(attrs) {
 		for (var key in attrs) {
+			// test for ember reserved key
+			var testobj = record.create();
+			if (testobj[key] !== undefined) throw new Error(this.name + '.' + key + ' is a reserved key, can not define with it.');
+
 			var rel = attrs[key].relationship;
 			if (rel) {
 				if ( ! stores[rel.store]) throw new Error(this.name + '.' + key + ' relates to undefined store: ' + rel.store);
@@ -24,6 +28,8 @@ var store = Ember.Object.extend(Ember.Evented, {
 			}
 			else {
 				this.attributes[key] = attrs[key].attribute;
+				// allow leaving data key blank to default to the defined key
+				if ( ! this.attributes[key].data_key) this.attributes[key].data_key = key;
 			}
 		}
 	},
@@ -31,8 +37,9 @@ var store = Ember.Object.extend(Ember.Evented, {
 	// set the attributes and relationships
 	// should be able to be shared by load and update
 	_set_record_properties: function(r, obj, load_embedded) {
-		for (var akey in this.attributes) {
-			if (obj[akey]) r.set(akey, obj[akey]);
+		for (var key in this.attributes) {
+			var akey = this.attributes[key].data_key;
+			if (obj[akey]) r.set(key, obj[akey]);
 		}	
 
 		for (var rkey in this.relationships) {
@@ -186,12 +193,16 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 	to_json: function(rec, opts) {
 		if ( ! rec) throw new Error('to_json requires a record to work on');
+		if ( opts && typeof opts !== 'object') throw new Error('to_json opts needs to be an object');
+		opts = opts || {};
 
-		var json = {};
+		var json = Object.create(null);
 		json[this.id_key] = rec.get(this.id_key);
 		for (var key in this.attributes) {
 			if (this.attributes[key].relationship) continue;
-			json[key] = rec.get(key);
+			json_key = this.attributes[key].data_key;
+			if (opts.use_source_keys) json_key = key;
+			json[json_key] = rec.get(key);
 		}
 		return json;
 	}
@@ -211,7 +222,6 @@ store_api.create = function(opts) {
 };
 
 store_api.find = function(name) {
-	if ( ! stores[name]) throw Error('no store with that name');
 	return stores[name];
 };
 

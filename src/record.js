@@ -1,5 +1,4 @@
-var record = Ember.Object.extend({
-});
+var record = Ember.Object.extend({});
 
 module.exports = record;
 
