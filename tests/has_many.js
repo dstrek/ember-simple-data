@@ -27,8 +27,7 @@ test('has many relationship', function(t) {
 		{
 			_id: 'bob',
 			name_src: 'bob',
-			comment_ids: [22, 123],
-			set: 2
+			comment_ids: [22, 123]
 		},
 		{
 			_id: 'samantha',

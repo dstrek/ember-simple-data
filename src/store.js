@@ -200,8 +200,8 @@ var store = Ember.Object.extend(Ember.Evented, {
 		json[this.id_key] = rec.get(this.id_key);
 		for (var key in this.attributes) {
 			if (this.attributes[key].relationship) continue;
-			json_key = this.attributes[key].data_key;
-			if (opts.use_source_keys) json_key = key;
+			json_key = key;
+			if (opts.use_source_keys) json_key = this.attributes[key].data_key;
 			json[json_key] = rec.get(key);
 		}
 		return json;

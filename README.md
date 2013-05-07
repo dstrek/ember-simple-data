@@ -25,14 +25,20 @@ var comments = SD.store.create({
 Then we need to define the models that will be inserted into the store. This is a description of the attributes on each object and its relationship to other objects you have. The `has_many` and `belongs_to` attribute definitions require you pass the name of the store which these related objects are defined on and which attribute contains the list of ids or id.
 
 ```js
+// USAGE
+SD.attribute(data_source_key)  // data_source_key is optional here, it will default to your defined key
+SD.has_many(data_source_key, store_name)
+SD.belongs_to(data_source_key, store_name)
+
+
 users.define({
 	name: SD.attribute(),
-	comments: SD.has_many('comment', 'comment_ids')
+	comments: SD.has_many('comment_ids', 'comment')
 });
 
 comments.define({
 	text: SD.attribute(),
-	post: SD.belongs_to('user', 'user_id')
+	post: SD.belongs_to('user_id', 'user')
 });
 ```
 
@@ -117,6 +123,39 @@ comments.find(22).get('user'); // The user object that this post belongs to
 comments.find(22).get('user').get('name'); // 'Riker'
 // and Ember has shortcuts to fetch attributes using dot notation
 comments.find(22).get('user.name'); // 'Riker'
+```
+
+### Using different data source attribute keys
+Because we use Ember.Object for our records there are a number of reserved keys for Ember methods and such. If you try and use one as an attribute it will throw an error
+
+```js
+users.define({
+	name: SD.attribute(),
+	set: SD.attribute()    // Error: user.set is a reserved key, can not define with it. 
+});
+```
+
+Since we shouldn't have to change the source output data in order to be able to use it we can set a different key to find the data on like so
+
+```js
+users.define({
+	name: SD.attribute(),
+	_set: SD.attribute('set')
+});
+
+users.load({
+	_id: 1
+	name: 'Picard',
+	set: 'Belongs to data set 1701.'
+});
+
+// we have to use our defined key to get and set in the app
+users.find(1).get('_set'); // 'Belongs to data set 1701.'
+users.find(1).set('_set', 'Belongs to data set 1.');
+
+// json output is the same but we can tell it to use the data source keys
+users.to_json(users.find(1))._set; // 'Belongs to data set 1.'
+users.to_json(users.find(1), {use_source_keys:true}).set; // 'Belongs to data set 1.'
 ```
 
 ### Loading embedded objects

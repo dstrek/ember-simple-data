@@ -22,8 +22,8 @@ test('can convert to json', function(t) {
 	var c = comments.find('blah-blah');
 
 	t.equal(comments.to_json(c).text, c.get('text'), 'json looks ok so far');
-	t.equal(comments.to_json(c).text2, c.get('different_key'), 'json with different source key name');
-	t.equal(comments.to_json(c, {use_source_keys:true}).different_key, c.get('different_key'), 'json choosing to use defined key name');
+	t.equal(comments.to_json(c).different_key, c.get('different_key'), 'json choosing to use defined key name');
+	t.equal(comments.to_json(c, {use_source_keys:true}).text2, c.get('different_key'), 'json with data source key name');
 	t.end();
 });
 
