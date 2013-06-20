@@ -9,6 +9,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 		this.id_key = this.id_key || 'id';
 		this.attributes = {};
 		this.relationships = {};
+		this.properties = {};
 		this.data = Ember.A([]);
 		if ( ! this.trigger && typeof this.fire === 'function') this.trigger = this.fire;
 	},
@@ -20,12 +21,18 @@ var store = Ember.Object.extend(Ember.Evented, {
 			if (testobj[key] !== undefined) throw new Error(this.name + '.' + key + ' is a reserved key, can not define with it.');
 
 			var rel = attrs[key].relationship;
+			var prop = attrs[key].property;
 			if (rel) {
 				if ( ! stores[rel.store]) throw new Error(this.name + '.' + key + ' relates to undefined store: ' + rel.store);
 				if ( ! rel.fkey) throw new Error(this.name + ' must define a foreign key attribute for relationship ' + key);
 				if (attrs[rel.fkey]) throw new Error(this.name + ' defined an attribute and relationship with same key: ' + key);
 				
 				this.relationships[key] = rel;
+			}
+			else if (prop) {
+				if (typeof prop.fn !== 'function') throw new Error(this.name + '.' + key + ' property function not defined.');
+				if ( ! Array.isArray(prop.deps)) throw new Error(this.name + '.' + key + ' property deps must be an array.');
+				this.properties[key] = prop;
 			}
 			else {
 				this.attributes[key] = attrs[key].attribute;
@@ -37,7 +44,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 	
 	// set the attributes and relationships
 	// should be able to be shared by load and update
-	_set_record_properties: function(r, obj, load_embedded) {
+	_set_record_properties: function(r, obj) {
 		for (var key in this.attributes) {
 			var akey = this.attributes[key].data_key;
 			if (obj[akey]) r.set(key, obj[akey]);
@@ -110,9 +117,19 @@ var store = Ember.Object.extend(Ember.Evented, {
 			else if (rel.type === 'belongs_to') {
 				return stores[rel.store].find(this.get(rel.fkey));
 			}
-		}).property(rel.fkey).readOnly();
+		}).property(rel.fkey).cacheable();
 		
 		Ember.defineProperty(r, key, computed);
+	},
+
+	// equivalent to ember .property() definitions
+	_set_record_virtuals: function(r) {
+		for (var key in this.properties) {
+			var p = this.properties[key];
+			var computed = Ember.computed(p.fn);
+			computed.property.apply(computed, p.deps).cacheable();
+			Ember.defineProperty(r, key, computed);
+		}	
 	},
 
 	_load_record: function(obj) {
@@ -124,6 +141,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 		var r = record.create();
 		r.set(this.id_key, obj[this.id_key]);
 		this._set_record_properties(r, obj);
+		this._set_record_virtuals(r);
 		this.data.pushObject(r);
 		return true;
 	},
@@ -150,9 +168,10 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 		if (existing) {
 			// fix updating properly later
-			for (var key in this.attributes) {
-				existing.set(key, obj[key]);
-			}
+			//for (var key in this.attributes) {
+			//	existing.set(key, obj[key]);
+			//}
+			this._set_record_properties(existing, obj);
 			return true;
 		}
 		else {
