@@ -10,6 +10,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 		this.attributes = {};
 		this.relationships = {};
 		this.data = Ember.A([]);
+		if ( ! this.trigger && typeof this.fire === 'function') this.trigger = this.fire;
 	},
 
 	define: function(attrs) {
@@ -64,13 +65,13 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 					rel_store.update(obj[rkey], true);
 					obj[rkey].forEach(function(o) {
-						console.log('loaded embedded has_many', o);
+						//console.log('loaded embedded has_many', o);
 						loaded_ids.push(o[rel_store.id_key]);
 					});
 
 					// ids might contain space and upside down underscores but... meh
 					if (r.get(rel.fkey).slice().sort().join(' ¡ ') !== loaded_ids.slice().sort().join(' ¡ ')) {
-						console.log('updating', r.get('_id'), rel.fkey, 'with', loaded_ids);
+						//console.log('updating', r.get('_id'), rel.fkey, 'with', loaded_ids);
 						r.get(rel.fkey).clear().pushObjects(loaded_ids);
 					}
 				}
@@ -80,10 +81,10 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 				// embedded object to load
 				if (typeof obj[rkey] === 'object') {
-					console.log('*** store', rel_store.name, 'updating with', obj[rkey]);
+					//console.log('*** store', rel_store.name, 'updating with', obj[rkey]);
 					rel_store.update(obj[rkey], true);
 					r.set(rel.fkey, obj[rkey][rel_store.id_key]);
-					console.log('loaded embedded belongs_to', obj[rkey]);
+					//console.log('loaded embedded belongs_to', obj[rkey]);
 				}
 			}
 			else {
@@ -140,7 +141,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 		}
 
 		if (loaded) this.trigger('loaded_records');
-		if (loaded) console.log(this.name + ' loaded ' + objs);
+		//if (loaded) console.log(this.name + ' loaded ' + objs);
 		return loaded;
 	},
 
@@ -173,7 +174,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 		}
 
 		if (updated) this.trigger('updated_records');
-		if (updated) console.log(this.name + ' upserted ' + objs);
+		//if (updated) console.log(this.name + ' upserted ' + objs);
 		return updated;
 	},
 
