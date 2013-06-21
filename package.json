@@ -1,6 +1,6 @@
 {
   "name": "ember-simple-data",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "a simple data store for emberjs",
   "main": "index.js",
   "repository": {

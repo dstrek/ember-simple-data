@@ -25,7 +25,6 @@ var store = Ember.Object.extend(Ember.Evented, {
 			if (rel) {
 				if ( ! stores[rel.store]) throw new Error(this.name + '.' + key + ' relates to undefined store: ' + rel.store);
 				if ( ! rel.fkey) throw new Error(this.name + ' must define a foreign key attribute for relationship ' + key);
-				if (attrs[rel.fkey]) throw new Error(this.name + ' defined an attribute and relationship with same key: ' + key);
 				
 				this.relationships[key] = rel;
 			}
