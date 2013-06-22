@@ -126,7 +126,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 		for (var key in this.properties) {
 			var p = this.properties[key];
 			var computed = Ember.computed(p.fn);
-			computed.property.apply(computed, p.deps).cacheable();
+			computed.property.apply(computed, p.deps);
 			Ember.defineProperty(r, key, computed);
 		}	
 	},
