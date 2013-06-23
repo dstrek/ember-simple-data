@@ -25,6 +25,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 			if (rel) {
 				if ( ! stores[rel.store]) throw new Error(this.name + '.' + key + ' relates to undefined store: ' + rel.store);
 				if ( ! rel.fkey) throw new Error(this.name + ' must define a foreign key attribute for relationship ' + key);
+				if (rel.fkey === key) throw new Error(this.name + ' must define a relationship key that does not match the data key: ' + key);
 				
 				this.relationships[key] = rel;
 			}
@@ -61,6 +62,8 @@ var store = Ember.Object.extend(Ember.Evented, {
 					// ids might contain space and upside down underscores but... meh
 					if (r.get(rel.fkey).slice().sort().join(' ¡ ') !== obj[rel.fkey].slice().sort().join(' ¡ ')) {
 						r.get(rel.fkey).clear().pushObjects(obj[rel.fkey]);
+						r.notifyPropertyChange(rel.fkey);
+						r.notifyPropertyChange(rkey);
 					}
 				}
 
@@ -71,14 +74,14 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 					rel_store.update(obj[rkey], true);
 					obj[rkey].forEach(function(o) {
-						//console.log('loaded embedded has_many', o);
 						loaded_ids.push(o[rel_store.id_key]);
 					});
 
 					// ids might contain space and upside down underscores but... meh
 					if (r.get(rel.fkey).slice().sort().join(' ¡ ') !== loaded_ids.slice().sort().join(' ¡ ')) {
-						//console.log('updating', r.get('_id'), rel.fkey, 'with', loaded_ids);
 						r.get(rel.fkey).clear().pushObjects(loaded_ids);
+						r.notifyPropertyChange(rel.fkey);
+						r.notifyPropertyChange(rkey);
 					}
 				}
 			}
@@ -87,10 +90,10 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 				// embedded object to load
 				if (typeof obj[rkey] === 'object') {
-					//console.log('*** store', rel_store.name, 'updating with', obj[rkey]);
 					rel_store.update(obj[rkey], true);
 					r.set(rel.fkey, obj[rkey][rel_store.id_key]);
-					//console.log('loaded embedded belongs_to', obj[rkey]);
+					r.notifyPropertyChange(rel.fkey);
+					r.notifyPropertyChange(rkey);
 				}
 			}
 			else {
@@ -116,7 +119,7 @@ var store = Ember.Object.extend(Ember.Evented, {
 			else if (rel.type === 'belongs_to') {
 				return stores[rel.store].find(this.get(rel.fkey));
 			}
-		}).property(rel.fkey).cacheable();
+		}).property(rel.fkey);
 		
 		Ember.defineProperty(r, key, computed);
 	},

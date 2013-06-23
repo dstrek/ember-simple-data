@@ -76,6 +76,15 @@ test('has many relationship', function(t) {
 	t.equal(users.find('bob').get('comments').objectAt(0).get('user.name'), 'bob', 'circular user -> comments[0] -> user for bob');
 	t.equal(users.find('samantha').get('comments').objectAt(0).get('user.name'), 'samantha', 'circular user -> comments[0] -> user for samantha');
 
+	// if we take a comment out it should update the relationship
+	users.update({
+		_id: 'bob',
+		name_src: 'bob',
+		comment_ids: [22]
+	});
+
+	t.equal(users.find('bob').get('comments').length, 1, 'bob now has 1 comment');
+
 	t.end();
 });
 
