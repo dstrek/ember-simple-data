@@ -1,4 +1,5 @@
 /*jshint loopfunc: true*/
+var _ = require('underscore');
 var stores = require('./stores');
 var record = require('./record');
 
@@ -182,16 +183,26 @@ var store = Ember.Object.extend(Ember.Evented, {
 		}
 	},
 
-	update: function(objs, upsert) {
+	update: function(objs, upsert, clobber) {
 		var updated = false;
 
 		if ( ! Array.isArray(objs)) {
 			updated = this._update_record(objs, upsert);
 		}
 		else {
+			var id_list = [];
 			objs.forEach(function(obj) {
 				if (this._update_record(obj, upsert)) updated = true;
+				id_list.push(obj[this.id_key]);
 			}, this);
+			
+			if (clobber) {
+				var remove_list = [];
+				this.data.forEach(function(o) {
+					if ( ! _.contains(id_list, o[this.id_key])) remove_list.push(o[this.id_key]);
+				}, this);
+				this.remove(remove_list);
+			}
 		}
 
 		if (updated) this.trigger('updated_records');
@@ -211,6 +222,21 @@ var store = Ember.Object.extend(Ember.Evented, {
 
 	filter: function(fn, context) {
 		return this.data.filter(fn, context);
+	},
+
+	_remove: function(id) {
+		this.data.removeObject(this.find(id));
+	},
+
+	remove: function(ids) {
+		if (Array.isArray(ids)) {
+			ids.forEach(function(id) {
+				this._remove(id);
+			}, this);
+		}
+		else {
+			this._remove(ids);
+		}
 	},
 
 	to_json: function(rec, opts) {

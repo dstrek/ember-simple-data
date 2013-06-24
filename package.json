@@ -1,6 +1,6 @@
 {
   "name": "ember-simple-data",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "a simple data store for emberjs",
   "main": "index.js",
   "repository": {
@@ -9,17 +9,18 @@
   },
   "keywords": [
     "ember",
-		"emberjs",
+    "emberjs",
     "simple",
     "data",
-		"store"
+    "store"
   ],
   "dependencies": {
-    "tap": "~0.4.1"
+    "tap": "~0.4.1",
+    "underscore": "~1.4.4"
   },
-	"scripts": {
-		"test": "tap tests/*.js"
-	},
+  "scripts": {
+    "test": "tap tests/*.js"
+  },
   "author": {
     "name": "Nathan Miller",
     "email": "nathan@shiftly.com",
