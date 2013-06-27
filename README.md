@@ -29,7 +29,7 @@ Then we need to define the models that will be inserted into the store. This is 
 SD.attribute(data_source_key)  // data_source_key is optional here, it will default to your defined key
 SD.has_many(data_source_key, store_name)
 SD.belongs_to(data_source_key, store_name)
-
+SD.property(function, deps)
 
 users.define({
 	name: SD.attribute(),
@@ -38,13 +38,20 @@ users.define({
 
 comments.define({
 	text: SD.attribute(),
-	post: SD.belongs_to('user_id', 'user')
+	post: SD.belongs_to('user_id', 'user'),
+	TEXT: SD.property(function() {
+		return this.get('text').toUpperCase();
+	}, ['text'])
 });
 ```
 
+### SD.property()
+
+This is an Ember Computer Property. Defined just like you would with Ember Objects, the deps argument is an array which contains the arguments you would normally pass to .property() on Ember Objects.
+
 ### Loading objects
 
-The json for our user objects would look something like this, where `user_data` and `comment_data` would be a result of api calls for example. The persistance side of things will be explained somewhere below.
+The json for our user objects would look something like this, where `user_data` and `comment_data` would be a result of api calls for example. 
 
 ```js
 var user_data = [
@@ -88,6 +95,8 @@ comments.load(comment_data);
 
 ### Updating and upserting objects
 
+#### store.update( Object || Array, bool, bool)
+
 We can update existing comment objects by using `comments.update()` and passing it the object to update. It will do a find for the object id given and then update attributes. If we want to do an 'update or insert' then we can pass true as a second parameter to the update call and it will insert a new object if not found for updating.
 
 ```js
@@ -97,6 +106,15 @@ comments.update({
 	user_id: 'troi'
 }, true);
 ```
+
+We can also tell upate to clobber the data store by passing true as the third argument. Meaning that it will update existing objects and remove any from the store that weren't provided. This is basically like clearing the store and loading but you won't get display issues in ember where everything disappears for a split second.
+
+```js
+comments.update([
+	{ _id: 1, ...},
+	{ _id: 2, ...},
+	{ _id: 3242, ...}
+], true, true)
 
 ### Finding objects
 
@@ -174,6 +192,5 @@ users.load({
 });
 ```
 
-## more to come
 
 
