@@ -6,7 +6,7 @@ var record = require('./record');
 var store = Ember.Object.extend(Ember.Evented, {
 
 	init: function() {
-		if ( ! this.name) throw new Error('you must at lest give stores a name');
+		if ( ! this.name) throw new Error('you must at least give stores a name');
 		this.id_key = this.id_key || 'id';
 		this.attributes = {};
 		this.relationships = {};
