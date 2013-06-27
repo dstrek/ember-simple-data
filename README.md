@@ -115,6 +115,7 @@ comments.update([
 	{ _id: 2, ...},
 	{ _id: 3242, ...}
 ], true, true)
+```
 
 ### Finding objects
 
